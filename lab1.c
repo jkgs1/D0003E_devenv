@@ -78,7 +78,7 @@ void updateReg(volatile uint8_t *reg, uint8_t high, uint8_t value) {
 }
 
 void primes(){
-    for (long i=100000;i<1000000;i++){
+    for (long i=10;i<1000;i++){
         if (is_prime(i)){
             writeLong(i);
         };
@@ -104,10 +104,28 @@ void writeLong(long i){
         if (i == 0) break;
     }
 }
-
+void blink(){
+    bool state = false;
+    // Prescaling factor 256
+    TCCR1B = (1 << CS12);
+    uint16_t increment = 31250/2;
+    while(true){
+        while(TCNT1 - increment < 31250);
+        if (!state){
+            LCDDR0 = (1 << 1) | (1 << 2);
+            state = true;
+        } else {
+            LCDDR0 = 0;
+            state = false;
+        }
+        increment += 31250/2;
+         
+    }
+}
 
 int main(void){
     LCD_Init();
     //writeChar(8,2);
-    //primes();
+    primes();
+    blink();
 }
