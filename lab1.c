@@ -10,15 +10,17 @@ void LCD_Init(void) {
     CLKPR = 0x80;
     CLKPR = 0x00;
     /* Use 32 kHz crystal oscillator */
-    /* 1/3 Bias and 1/4 duty, SEG0:SEG24 is used as port pins */
-    LCDCRB = (1 << LCDCS) | (1 << LCDMUX1) | (1 << LCDMUX0) | (1 << LCDPM2);
-    /* Using 16 as prescaler selection and 7 as LCD Clock Divide */
-    /* gives a frame rate of 49 Hz */
-    LCDFRR = (1 << LCDCD2) | (1 << LCDCD1);
-    /* Set segment drive time to 125 μs and output voltage to 3.3 V*/
-    LCDCCR = (1 << LCDDC1) | (1 << LCDCC3) | (1 << LCDCC2) | (1 << LCDCC1);
-    /* Enable LCD, default waveform and no interrupt enabled */
-    LCDCRA = (1 << LCDEN);
+    /* 1/3 Bias and 1/4 duty. MUX0 & MUX1 Enabled */
+    /* SEG0:SEG24 is used as port pins. Enable all segments, LCDPM */
+    LCDCRB = (1 << LCDCS) | (1 << LCDMUX1) | (1 << LCDMUX0) | (1 << LCDPM2 | (1 << LCDPM1) | (1 << LCDPM0));
+    /* Using 16 as prescaler selection and 8 as LCD Clock Divide */
+    /* gives a frame rate of 32 Hz */
+    LCDFRR = (1 << LCDCD2) | (1 << LCDCD1) | (1 << LCDCD0);
+    /* Output voltage to 3.35 V (all enabled) */
+    /* LCDDC[0:2] set to 0 for segment drive time 300μs*/
+    LCDCCR = (1 << LCDCC3) | (1 << LCDCC2) | (1 << LCDCC1  | (1 << LCDCC0));
+    /* Enable LCD, low power waveform and no interrupt enabled */
+    LCDCRA = (1 << LCDEN )| (1 << LCDAB);
 }
 
 static const uint16_t lcdscc[10]= {
