@@ -23,6 +23,8 @@ void LCD_Init(void) {
     LCDCRA = (1 << LCDEN )| (1 << LCDAB);
 }
 
+// Store the lcdscc of every valid input in a sorted array,
+// Makes it possible to easily retrive ch by index and later store it in var seg
 static const uint16_t lcdscc[10]= {
     0x1551, // '0'
     0x0110, // '1'
@@ -37,17 +39,19 @@ static const uint16_t lcdscc[10]= {
 };
 
 void writeChar(int ch, int pos){
-    /* Check pos value is within allowed interval */
+    /* Check pos and ch value is within allowed interval */
     if (pos < 0 || pos > 5){
         return;
     }
     if (ch < 0 || ch > 9) {
         return;
     }
-    
+     
     uint16_t seg = lcdscc[ch];
     volatile uint8_t *base_reg;
 
+    // Depending on what position we want to write on,
+    // a switch case on pos is used to determine the right registry
     switch (pos) {
         case 0: base_reg = &LCDDR0; break;
         case 1: base_reg = &LCDDR0; break;
@@ -57,30 +61,30 @@ void writeChar(int ch, int pos){
         case 5: base_reg = &LCDDR2; break;
     }
     for (int i = 0; i < 4; i++) {
-        uint8_t nibble = seg & 0x0F; // Get the lowest 4 bits
+        uint8_t nibble = seg & 0x0F;                      // Get the lowest 4 bits
         updateReg(base_reg + (i * 5), (pos % 2), nibble); // Jump by 5 each time
-        seg = seg >> 4; // Shift to the next nibble
+        seg = seg >> 4;                                   // Shift to the next nibble
     }
 }
 
-void updateReg(volatile uint8_t *reg, uint8_t high, uint8_t value)
-{
+void updateReg(volatile uint8_t *reg, uint8_t high, uint8_t value) {
     if (high) {
         *reg &= 0x0F;          // clear upper nibble
-        *reg |= value << 4;   // write digit
-        } else {
+        *reg |= value << 4;    // write digit
+    } else {
         *reg &= 0xF0;          // clear lower nibble
         *reg |= value;
     }
 }
 
 void primes(){
-    for (long i=2;i<1000;i++){
+    for (long i=100000;i<1000000;i++){
         if (is_prime(i)){
             writeLong(i);
         };
     }
 }
+// Return true if prime, else false
 bool is_prime(long i){
     for(long n=2; n<i; n++){
         if(i % n == 0){
@@ -104,5 +108,6 @@ void writeLong(long i){
 
 int main(void){
     LCD_Init();
-    primes();
+    //writeChar(8,2);
+    //primes();
 }
