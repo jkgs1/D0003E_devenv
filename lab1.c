@@ -5,6 +5,7 @@
 void updateReg(volatile uint8_t *reg, uint8_t high, uint8_t value);
 bool is_prime(long i);
 void writeLong(long i);
+void partIV(void);
 
 void LCD_Init(void) {
     CLKPR = 0x80;
@@ -123,9 +124,84 @@ void blink(){
     }
 }
 
+void button(){
+    PORTB = (1 << 7);
+    bool state = false;
+    while(true){
+        // Loop indefinality until input is detected
+        while(PINB & (1 << 7));
+        // Loop indefinality until button is released
+        while(!(PINB & (1 << 7)));
+        
+        if(!state){
+            LCDDR2 = 0;
+            LCDDR0 = (1 << 5) | (1 << 6);
+            state = true;
+        } else {
+            LCDDR0 = 0;
+            LCDDR2 = (1 << 1) | (1 << 2);
+            state = false;
+        }
+    }
+}
+
+void partIV(void){
+    PORTB = (1 << 7);
+    bool stateButton = false;
+    bool stateBlink = false;
+    // Prescaling factor 256
+    TCCR1B = (1 << CS12);
+    uint16_t increment = 31250/2;
+    long i = 2;
+    while(true){
+        // Blink priority 1
+        while(TCNT1 - increment < 31250);
+        if (!stateBlink){
+            LCDDR0 = (1 << 1) | (1 << 2);
+            stateBlink = true;
+        } else {
+            LCDDR0 = 0;
+            stateBlink = false;
+        }
+        increment += 31250/2;
+        
+        if(!(PINB & (1<<7))){
+            while(!(PINB & (1 << 7))){
+                while(TCNT1 - increment < 31250);
+                if (!stateBlink){
+                    LCDDR0 = (1 << 1) | (1 << 2);
+                    stateBlink = true;
+                } else {
+                    LCDDR0 = 0;
+                    stateBlink = false;
+                }
+                increment += 31250/2;
+                if (is_prime(i) && i < 10000){
+                    writeLong(i);
+                }   
+            }
+                if(!stateButton){
+                    LCDDR3 = 0;
+                    LCDDR8 = (1 << 0);
+                    stateButton = true;
+                } else{
+                    LCDDR8 = 0;
+                    LCDDR3 = (1 << 0);
+                    stateButton = false;
+                }
+        }
+        
+        if (is_prime(i) && i < 10000){
+            writeLong(i);
+        }
+        i+=1;
+    }
+}
+
 int main(void){
     LCD_Init();
     //writeChar(8,2);
-    primes();
-    blink();
+    //primes();
+    //blink();
+    partIV();
 }
