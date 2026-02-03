@@ -1,18 +1,43 @@
 {
-  "configurations": [
-    {
-      "name": "linux-gcc-x64",
-      "includePath": [
-        "${workspaceFolder}/**"
-      ],
-      "compilerPath": "/usr/bin/gcc",
-      "cStandard": "${default}",
-      "cppStandard": "${default}",
-      "intelliSenseMode": "linux-gcc-x64",
-      "compilerArgs": [
-        ""
-      ]
-    }
-  ],
-  "version": 4
+    "configurations": [
+        {
+            "name": "linux-gcc-x64",
+            "includePath": [
+                "${workspaceFolder}/**"
+            ],
+            "defines": [
+  "__AVR_ATmega169__"
+],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "${default}",
+            "cppStandard": "${default}",
+            "intelliSenseMode": "linux-gcc-x64",
+            "compilerArgs": [
+                ""
+            ]
+        },
+        {
+            "name": "AVR",
+            "intelliSenseMode": "${default}",
+            "compilerPath": "/home/jkgs/git/D0003E_devenv/Makefile",
+            "cStandard": "${default}",
+            "cppStandard": "${default}",
+            "includePath": [
+                "/home/jkgs/git/D0003E_devenv/**"
+            ],
+            "compilerArgs": [
+                "-g",
+                "-Os",
+                "-Wall",
+                "-Wextra",
+                "-fpermissive",
+                "-fno-exceptions",
+                "-fno-threadsafe-statics",
+                "-ffunction-sections",
+                "-fdata-sections",
+                "-pipe"
+            ]
+        }
+    ],
+    "version": 4
 }

@@ -55,5 +55,14 @@
   "C_Cpp_Runner.useLeakSanitizer": false,
   "C_Cpp_Runner.showCompilationTime": false,
   "C_Cpp_Runner.useLinkTimeOptimization": false,
-  "C_Cpp_Runner.msvcSecureNoWarnings": false
+  "C_Cpp_Runner.msvcSecureNoWarnings": false,
+  "AVR.reporter.arguments": [
+    "-A"
+  ],
+  "AVR.source.compiler": "/home/jkgs/git/D0003E_devenv/Makefile",
+  "AVR.programmer.tool": "/home/jkgs/git/D0003E_devenv/lab1.c",
+  "AVR.programmer.definitions": "/home/jkgs/git/D0003E_devenv/run/lab1.o",
+  "AVR.source.libraries": [
+    "/home/jkgs/git/D0003E_devenv"
+  ]
 }
