@@ -69,9 +69,15 @@ bool is_prime(long i){
     return true;
 }
 
+int pp = 0;
+
 void printAt(long num, int pos) {
-    int pp = pos;
+    pp = pos;
     writeChar( (num % 100) / 10 + '0', pp);
+    volatile int i=0;
+    while(i<1000){
+        i++;
+    }
     pp++;
     writeChar( num % 10 + '0', pp);
 }
@@ -81,7 +87,6 @@ void computePrimes(int pos) {
     for(n = 1; ; n++) {
         if (is_prime(n)) {
             printAt(n, pos);
-            yield();
         }
     }
 }

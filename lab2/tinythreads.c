@@ -29,12 +29,29 @@ thread current = &initp;
 
 int initialized = 0;
 
+
+
 static void initialize(void) {
     int i;
     for (i=0; i<NTHREADS-1; i++)
         threads[i].next = &threads[i+1];
     threads[NTHREADS-1].next = NULL;
 
+    PORTB = (1 << 7);
+    EIMSK = (1 << PCIE1);
+    PCMSK1 = (1 << PCINT15);
+    // Force timer to start at 0
+    TCNT1 = 0;
+    // Enable timer output compare A
+    TIMSK1 = (1 << 1);
+    // OC1A high on compare
+    TCCR1A = (1 << COM1A1) | (1 << COM1A0);
+    // CTC
+    TCCR1A = (1 << WGM12);
+    // Timer prescaler 1024
+    TCCR1B = (1 << CS12) | (1 << CS10);
+    // 8MHz / 1024 * 50ms 
+    OCR1A = 390;
 
     initialized = 1;
 }
@@ -117,9 +134,48 @@ void yield(void) {
 }
 
 void lock(mutex *m) {
+    /*
+    if variable unlocked
+        lock
+    else
+        queue running thread
+        AND run next thread
+    */
+    DISABLE();
+    if (m->locked == 0){
+        m->locked = 1;
+    }else {
+        enqueue(current, &m->waitQ);
+        dispatch(dequeue(&readyQ));
+    }
+    ENABLE();
 
 }
 
 void unlock(mutex *m) {
+    /*
+    if waitQ !empty
+        run next thread
+    else
+        locked flag shall reset
+    */
+    DISABLE();
+    if (m->waitQ!=NULL){
+        thread p = dequeue(&m->waitQ);
+        enqueue(p, &readyQ);
+    }else {
+        m->locked = 0;
+    }
+    ENABLE();
 
+}
+
+ISR(TIMER1_COMPA_vect){
+    yield();
+}
+
+ISR(PCINT1_vect){
+    if(!(PINB & (1<<7))){
+        yield();
+    }
 }
