@@ -44,14 +44,12 @@ static void initialize(void) {
     TCNT1 = 0;
     // Enable timer output compare A
     TIMSK1 = (1 << 1);
-    // OC1A high on compare
+    // OC1A high on compare and CTC mode
     TCCR1A = (1 << COM1A1) | (1 << COM1A0);
-    // CTC
-    TCCR1A = (1 << WGM12);
-    // Timer prescaler 1024
-    TCCR1B = (1 << CS12) | (1 << CS10);
-    // 8MHz / 1024 * 50ms 
-    OCR1A = 390;
+    // Timer prescaler 1024, CTC mode
+    TCCR1B = (1 << CS12) | (1 << CS10) | (1 << WGM12);
+    // (8MHz / 1024)*0.05 
+    OCR1A = 391;
 
     initialized = 1;
 }
