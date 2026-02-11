@@ -35,7 +35,7 @@ static const uint16_t lcdscc[10]= {
     0x1B41, // '5'
     0x1F41, // '6'
     0x0111, // '7'
-    0x0F51, // '8'
+    0x1F51, // '8'
     0x1B51, // '9'
 };
 
@@ -79,7 +79,7 @@ void updateReg(volatile uint8_t *reg, uint8_t high, uint8_t value) {
 }
 
 void primes(){
-    for (long i=10;i<1000;i++){
+    for (long i=10;i<100000000000000;i++){
         if (is_prime(i)){
             writeLong(i);
         };
@@ -201,7 +201,8 @@ void partIV(void){
 int main(void){
     LCD_Init();
     //writeChar(8,2);
-    primes();
+    //primes();
     //blink();
     //partIV();
+    button();
 }
