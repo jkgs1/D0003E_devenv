@@ -12,6 +12,7 @@ typedef struct thread_block *thread;
 void spawn(void (*code)(int), int arg);
 void yield(void);
 void LCD_Init(void);
+void printAt(long num, int pos);
 
 struct mutex_block {
     int locked;

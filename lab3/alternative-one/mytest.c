@@ -5,6 +5,8 @@
 
 void updateReg(volatile uint8_t *reg, uint8_t high, uint8_t value);
 bool is_prime(long i);
+uint16_t timer_reset();
+uint16_t timer_return();
 
 // Store the lcdscc of every valid input in a sorted array,
 // Makes it possible to easily retrive ch by index and later store it in var seg
@@ -69,17 +71,12 @@ bool is_prime(long i){
     return true;
 }
 
-int pp=0;
 mutex m = MUTEX_INIT;
 
 void printAt(long num, int pos) {
     lock(&m);
-    pp = pos;
+    int pp = pos;
     writeChar( (num % 100) / 10 + '0', pp);
-    volatile int i=0;
-    while(i<1000){
-        i++;
-    }
     pp++;
     writeChar( num % 10 + '0', pp);
     unlock(&m);
@@ -92,10 +89,49 @@ void computePrimes(int pos) {
             printAt(n, pos);
         }
     }
+    yield();
+}
+
+void blink(){
+    bool state;
+    while(1){
+        if (timer_return() >= 20){
+            if (!state){
+                LCDDR0 = (1 << 1) | (1 << 2);
+                state = true;
+            } else {
+                LCDDR0 = (0 << 1) | (0 << 2);
+                state = false;
+            }
+            timer_reset();
+        }
+    }
+}
+
+void button(){
+    PORTB = (1 << 7);
+    bool state = false;
+    while(true){
+        // Loop indefinality until input is detected
+        while(PINB & (1 << 7));
+        // Loop indefinality until button is released
+        while(!(PINB & (1 << 7)));
+        
+        if(!state){
+            LCDDR3 = 0;
+            LCDDR8 = (1 << 0);
+            state = true;
+        } else {
+            LCDDR8 = 0;
+            LCDDR3 = (1 << 0);
+            state = false;
+        }
+    }
 }
 
 int main() {
     LCD_Init();
+    spawn(button, 0);
     spawn(computePrimes, 0);
-    computePrimes(3);
+    blink();
 }

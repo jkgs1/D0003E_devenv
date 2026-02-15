@@ -107,6 +107,7 @@ void spawn(void (* function)(int), int arg) {
     DISABLE();
     if (!initialized) initialize();
 
+    // Grab unused thread structure
     newp = dequeue(&freeQ);
     newp->function = function;
     newp->arg = arg;
@@ -166,12 +167,28 @@ void unlock(mutex *m) {
 
 }
 
+static volatile uint16_t timerCount = 0;
+
+uint16_t timer_return(){
+    return timerCount;
+}
+uint16_t timer_reset(){
+    DISABLE();
+    timerCount = 0;
+    ENABLE();
+}
+
 ISR(TIMER1_COMPA_vect){
+    timerCount ++;
     yield();
 }
+
+int count = 0;
 
 ISR(PCINT1_vect){
     if(!(PINB & (1<<7))){
         yield();
+        count ++;
+        printAt(count, 4);
     }
 }

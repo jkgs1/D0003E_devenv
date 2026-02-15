@@ -109,9 +109,10 @@ void blink(){
     bool state = false;
     // Prescaling factor 256
     TCCR1B = (1 << CS12);
-    uint16_t increment = 31250/2;
+    uint16_t next = TCNT1;
     while(true){
-        while(TCNT1 - increment < 31250);
+        next += 31250/2;
+        while(TCNT1 - next < 31250);
         if (!state){
             LCDDR0 = (1 << 1) | (1 << 2);
             state = true;
@@ -119,8 +120,6 @@ void blink(){
             LCDDR0 = 0;
             state = false;
         }
-        increment += 31250/2;
-         
     }
 }
 
@@ -151,23 +150,23 @@ void partIV(void){
     bool stateBlink = false;
     // Prescaling factor 256
     TCCR1B = (1 << CS12);
-    uint16_t increment = 31250/2;
+    uint16_t next = TCNT1;
     long i = 2;
     while(true){
-        // Blink priority 1
-        while(TCNT1 - increment < 31250);
-        if (!stateBlink){
-            LCDDR0 = (1 << 1) | (1 << 2);
-            stateBlink = true;
-        } else {
-            LCDDR0 = 0;
-            stateBlink = false;
+        while(TCNT1 - next < 31250){
+            next+=31250/2;
+            if (!stateBlink){
+                LCDDR0 = (1 << 1) | (1 << 2);
+                stateBlink = true;
+            } else {
+                LCDDR0 = 0;
+                stateBlink = false;
+            }
         }
-        increment += 31250/2;
-        
+
         if(!(PINB & (1<<7))){
             while(!(PINB & (1 << 7))){
-                while(TCNT1 - increment < 31250);
+                while(TCNT1 - next < 31250);
                 if (!stateBlink){
                     LCDDR0 = (1 << 1) | (1 << 2);
                     stateBlink = true;
@@ -175,7 +174,6 @@ void partIV(void){
                     LCDDR0 = 0;
                     stateBlink = false;
                 }
-                increment += 31250/2;
                 if (is_prime(i) && i < 10000){
                     writeLong(i);
                 }   
@@ -203,6 +201,6 @@ int main(void){
     //writeChar(8,2);
     //primes();
     //blink();
-    //partIV();
-    button();
+    partIV();
+    //button();
 }
