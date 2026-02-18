@@ -7,6 +7,8 @@ void updateReg(volatile uint8_t *reg, uint8_t high, uint8_t value);
 bool is_prime(long i);
 uint16_t timer_reset();
 uint16_t timer_return();
+uint16_t count_return();
+
 
 // Store the lcdscc of every valid input in a sorted array,
 // Makes it possible to easily retrive ch by index and later store it in var seg
@@ -84,7 +86,7 @@ void printAt(long num, int pos) {
 
 void computePrimes(int pos) {
     long n;
-    for(n = 1; ; n++) {
+    for(n = 1; ; n+=2) {
         if (is_prime(n)) {
             printAt(n, pos);
         }
@@ -92,23 +94,25 @@ void computePrimes(int pos) {
     yield();
 }
 
-void blink(){
+void blink(int arg){
+    (void)arg;
     bool state;
     while(1){
-        if (timer_return() >= 20){
+        if (timer_return() >= 10){
             if (!state){
-                LCDDR0 = (1 << 1) | (1 << 2);
+                LCDDR18 = 0x1;
                 state = true;
             } else {
-                LCDDR0 = (0 << 1) | (0 << 2);
+                LCDDR18 = 0x0;
                 state = false;
             }
             timer_reset();
         }
     }
 }
-
-void button(){
+#define LCDDR2_MASK ((1 << 1) | (1 << 2))
+void button(int arg){
+    (void)arg;
     PORTB = (1 << 7);
     bool state = false;
     while(true){
@@ -116,14 +120,14 @@ void button(){
         while(PINB & (1 << 7));
         // Loop indefinality until button is released
         while(!(PINB & (1 << 7)));
+
+        printAt(count_return(), 4);
         
         if(!state){
-            LCDDR3 = 0;
-            LCDDR8 = (1 << 0);
+            LCDDR2 = (LCDDR2 & ~((1 << 1) | (1 << 2))) | (1 << 1);
             state = true;
         } else {
-            LCDDR8 = 0;
-            LCDDR3 = (1 << 0);
+            LCDDR2 = (LCDDR2 & ~((1 << 1) | (1 << 2))) | (1 << 2);
             state = false;
         }
     }
@@ -131,7 +135,9 @@ void button(){
 
 int main() {
     LCD_Init();
+    spawn(blink, 0);
+    //spawn(computePrimes, 0);
     spawn(button, 0);
-    spawn(computePrimes, 0);
-    blink();
+    //button();
+    computePrimes(0);
 }

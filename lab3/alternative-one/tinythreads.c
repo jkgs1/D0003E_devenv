@@ -183,12 +183,15 @@ ISR(TIMER1_COMPA_vect){
     yield();
 }
 
-int count = 0;
+static volatile uint16_t count = 0;
+uint16_t count_return(){
+    return count;
+}
+
 
 ISR(PCINT1_vect){
     if(!(PINB & (1<<7))){
-        yield();
         count ++;
-        printAt(count, 4);
+        yield();
     }
 }
