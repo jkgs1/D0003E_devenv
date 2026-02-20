@@ -46,10 +46,10 @@ static void initialize(void) {
     TIMSK1 = (1 << 1);
     // OC1A high on compare and CTC mode
     TCCR1A = (1 << COM1A1) | (1 << COM1A0);
-    // Timer prescaler 1024, CTC mode
-    TCCR1B = (1 << CS12) | (1 << CS10) | (1 << WGM12);
-    // (8MHz / 1024)*0.05 
-    OCR1A = 391;
+    // prescaler 256
+    TCCR1B = (1<<CS12);
+    OCR1A  = 64;
+    TIMSK1 = (1<<OCIE1A);
 
     initialized = 1;
 }
@@ -76,14 +76,12 @@ static void enqueue(thread p, thread *queue) {
     if (*queue == NULL) {
         *queue = p;
     } else {
-        thread q = *queue;
-        while (q->next)
-            q = q->next;
-        q->next = p;
+        p->next = *queue;
+        *queue =p;
     }
 }
 
-static thread dequeue(thread *queue) {
+static thread dequeue(thread *queue){
     thread p = *queue;
     if (*queue) {
         *queue = (*queue)->next;
@@ -121,6 +119,7 @@ void spawn(void (* function)(int), int arg) {
     SETSTACK(&newp->context, &newp->stack);
 
     enqueue(newp, &readyQ);
+    dispatch(newp);
     ENABLE();
 }
 
@@ -159,6 +158,7 @@ void unlock(mutex *m) {
     if (m->waitQ!=NULL){
         thread p = dequeue(&m->waitQ);
         enqueue(p, &readyQ);
+        dispatch(p);
     }else {
         m->locked = 0;
     }
@@ -166,12 +166,7 @@ void unlock(mutex *m) {
 
 }
 
-ISR(TIMER1_COMPA_vect){
-    yield();
-}
-
-ISR(PCINT1_vect){
-    if(!(PINB & (1<<7))){
-        yield();
-    }
+static volatile uint16_t count = 0;
+uint16_t count_return(){
+    return count;
 }

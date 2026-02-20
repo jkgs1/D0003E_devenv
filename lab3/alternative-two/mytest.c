@@ -2,9 +2,11 @@
 #include <stdbool.h>
 #include <avr/io.h>
 #include <util/delay.h>
+#include <avr/interrupt.h>
 
 void updateReg(volatile uint8_t *reg, uint8_t high, uint8_t value);
 bool is_prime(long i);
+uint16_t count_return();
 
 // Store the lcdscc of every valid input in a sorted array,
 // Makes it possible to easily retrive ch by index and later store it in var seg
@@ -70,7 +72,9 @@ bool is_prime(long i){
 }
 
 int pp=0;
-mutex m = MUTEX_INIT;
+mutex m = MUTEX_INIT;  // printAt
+mutex blink_mutex = MUTEX_INIT;  // blink
+mutex button_mutex = MUTEX_INIT; // button
 
 void printAt(long num, int pos) {
     lock(&m);
@@ -93,9 +97,52 @@ void computePrimes(int pos) {
         }
     }
 }
+void blink(int arg){
+    (void)arg;
+    bool state;
+    while(1){
+        lock(&blink_mutex);
+
+        if (!state){
+            LCDDR18 = 0x1;
+            state = true;
+        } else {
+            LCDDR18 = 0x0;
+            state = false;
+        }
+    }
+}
+#define LCDDR2_MASK ((1 << 1) | (1 << 2))
+void button(int arg){
+    (void)arg;
+    PORTB = (1 << 7);
+    bool state = false;
+    while(true){
+        lock(&button_mutex);
+        printAt(count_return(), 4);
+
+        if(!state){
+            LCDDR2 = (LCDDR2 & ~((1 << 1) | (1 << 2))) | (1 << 1);
+            state = true;
+        } else {
+            LCDDR2 = (LCDDR2 & ~((1 << 1) | (1 << 2))) | (1 << 2);
+            state = false;
+        }
+    }
+}
+ISR(TIMER1_COMPA_vect){
+    unlock(&blink_mutex);
+}
+
+ISR(PCINT1_vect){
+    if(!(PINB & (1<<7))){
+        unlock(&button_mutex);
+    }
+}
 
 int main() {
     LCD_Init();
-    spawn(computePrimes, 0);
-    computePrimes(3);
+    spawn(blink, 0);
+    spawn(button, 0);
+    computePrimes(0);
 }
