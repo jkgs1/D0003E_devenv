@@ -50,6 +50,7 @@ static void initialize(void) {
     TCCR1B = (1 << CS12) | (1 << CS10) | (1 << WGM12);
     // (8MHz / 1024)*0.5
     OCR1A = 3910;
+    //bool state = false;
 
     initialized = 1;
 }
@@ -98,7 +99,6 @@ static void dispatch(thread next) {
         longjmp(next->context,1);
     }
 }
-
 void spawn(void (* function)(int), int arg) {
     thread newp;
 
@@ -172,4 +172,22 @@ uint16_t count_return(){
 }
 uint16_t count_increase(){
     return count++;
+}
+static volatile uint8_t state_blink = 0;
+uint8_t state_toggle_for_blink(){
+    if(state_blink == 0) {
+        state_blink = 1;
+        return state_blink;
+    }
+    state_blink = 0;
+    return state_blink;
+}
+static volatile uint8_t state_button = 0;
+uint8_t state_toggle_for_button(){
+    if(state_button == 0) {
+        state_button = 1;
+        return state_button;
+    }
+    state_button = 0;
+    return state_button;
 }

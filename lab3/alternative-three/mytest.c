@@ -8,6 +8,8 @@ void updateReg(volatile uint8_t *reg, uint8_t high, uint8_t value);
 bool is_prime(long i);
 uint16_t count_return();
 uint16_t count_increase();
+uint8_t state_toggle_for_blink();
+uint8_t state_toggle_for_button();
 
 // Store the lcdscc of every valid input in a sorted array,
 // Makes it possible to easily retrive ch by index and later store it in var seg
@@ -96,39 +98,31 @@ void computePrimes(int pos) {
         }
     }
 }
-void blink(int arg){
-    (void)arg;
-    bool state;
-    if (!state){
+void blink(int state){
+    if (state == 0){
         LCDDR18 = 0x1;
-        state = true;
     } else {
         LCDDR18 = 0x0;
-        state = false;
     }
 }
 #define LCDDR2_MASK ((1 << 1) | (1 << 2))
-void button(int arg){
-    (void)arg;
+void button(int state){
     PORTB = (1 << 7);
-    bool state = false;
     count_increase();
     printAt(count_return(), 4);
-    if(!state){
+    if(state == 0){
         LCDDR2 = (LCDDR2 & ~((1 << 1) | (1 << 2))) | (1 << 1);
-        state = true;
     } else {
         LCDDR2 = (LCDDR2 & ~((1 << 1) | (1 << 2))) | (1 << 2);
-        state = false;
     }
 }
 ISR(TIMER1_COMPA_vect){
-    
+    spawn(blink, state_toggle_for_blink());
 }
 
 ISR(PCINT1_vect){
     if(!(PINB & (1<<7))){
-    
+        spawn(button, state_toggle_for_button());
     }
 }
 
