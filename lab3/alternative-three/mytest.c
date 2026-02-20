@@ -2,9 +2,12 @@
 #include <stdbool.h>
 #include <avr/io.h>
 #include <util/delay.h>
+#include <avr/interrupt.h>
 
 void updateReg(volatile uint8_t *reg, uint8_t high, uint8_t value);
 bool is_prime(long i);
+uint16_t count_return();
+uint16_t count_increase();
 
 // Store the lcdscc of every valid input in a sorted array,
 // Makes it possible to easily retrive ch by index and later store it in var seg
@@ -93,9 +96,45 @@ void computePrimes(int pos) {
         }
     }
 }
+void blink(int arg){
+    (void)arg;
+    bool state;
+    if (!state){
+        LCDDR18 = 0x1;
+        state = true;
+    } else {
+        LCDDR18 = 0x0;
+        state = false;
+    }
+}
+#define LCDDR2_MASK ((1 << 1) | (1 << 2))
+void button(int arg){
+    (void)arg;
+    PORTB = (1 << 7);
+    bool state = false;
+    count_increase();
+    printAt(count_return(), 4);
+    if(!state){
+        LCDDR2 = (LCDDR2 & ~((1 << 1) | (1 << 2))) | (1 << 1);
+        state = true;
+    } else {
+        LCDDR2 = (LCDDR2 & ~((1 << 1) | (1 << 2))) | (1 << 2);
+        state = false;
+    }
+}
+ISR(TIMER1_COMPA_vect){
+    
+}
+
+ISR(PCINT1_vect){
+    if(!(PINB & (1<<7))){
+    
+    }
+}
 
 int main() {
     LCD_Init();
-    spawn(computePrimes, 0);
-    computePrimes(3);
+    spawn(blink, 0);
+    spawn(button, 0);
+    computePrimes(0);
 }
