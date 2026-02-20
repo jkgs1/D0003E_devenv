@@ -46,10 +46,10 @@ static void initialize(void) {
     TIMSK1 = (1 << 1);
     // OC1A high on compare and CTC mode
     TCCR1A = (1 << COM1A1) | (1 << COM1A0);
-    // prescaler 256
-    TCCR1B = (1<<CS12);
-    OCR1A  = 64;
-    TIMSK1 = (1<<OCIE1A);
+    // Timer prescaler 1024, CTC mode
+    TCCR1B = (1 << CS12) | (1 << CS10) | (1 << WGM12);
+    // (8MHz / 1024)*0.5
+    OCR1A = 3910;
 
     initialized = 1;
 }
@@ -118,7 +118,7 @@ void spawn(void (* function)(int), int arg) {
     }
     SETSTACK(&newp->context, &newp->stack);
 
-    enqueue(newp, &readyQ);
+    enqueue(current, &readyQ);
     dispatch(newp);
     ENABLE();
 }
@@ -157,7 +157,7 @@ void unlock(mutex *m) {
     DISABLE();
     if (m->waitQ!=NULL){
         thread p = dequeue(&m->waitQ);
-        enqueue(p, &readyQ);
+        enqueue(current, &readyQ);
         dispatch(p);
     }else {
         m->locked = 0;
@@ -169,4 +169,7 @@ void unlock(mutex *m) {
 static volatile uint16_t count = 0;
 uint16_t count_return(){
     return count;
+}
+uint16_t count_increase(){
+    return count++;
 }

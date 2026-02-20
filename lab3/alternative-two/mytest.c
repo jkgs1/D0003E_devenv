@@ -7,6 +7,7 @@
 void updateReg(volatile uint8_t *reg, uint8_t high, uint8_t value);
 bool is_prime(long i);
 uint16_t count_return();
+uint16_t count_increase();
 
 // Store the lcdscc of every valid input in a sorted array,
 // Makes it possible to easily retrive ch by index and later store it in var seg
@@ -119,8 +120,8 @@ void button(int arg){
     bool state = false;
     while(true){
         lock(&button_mutex);
+        count_increase();
         printAt(count_return(), 4);
-
         if(!state){
             LCDDR2 = (LCDDR2 & ~((1 << 1) | (1 << 2))) | (1 << 1);
             state = true;
@@ -141,6 +142,8 @@ ISR(PCINT1_vect){
 }
 
 int main() {
+    lock(&button_mutex);
+    lock(&blink_mutex);
     LCD_Init();
     spawn(blink, 0);
     spawn(button, 0);
