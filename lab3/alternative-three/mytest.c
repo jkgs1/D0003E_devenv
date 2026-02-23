@@ -11,6 +11,23 @@ uint16_t count_increase();
 uint8_t state_toggle_for_blink();
 uint8_t state_toggle_for_button();
 
+void LCD_Init(void) {
+    CLKPR = 0x80;
+    CLKPR = 0x00;
+    /* Use 32 kHz crystal oscillator */
+    /* 1/3 Bias and 1/4 duty. MUX0 & MUX1 Enabled */
+    /* SEG0:SEG24 is used as port pins. Enable all segments, LCDPM */
+    LCDCRB = (1 << LCDCS) | (1 << LCDMUX1) | (1 << LCDMUX0) | (1 << LCDPM2 | (1 << LCDPM1) | (1 << LCDPM0));
+    /* Using 16 as prescaler selection and 8 as LCD Clock Divide */
+    /* gives a frame rate of 32 Hz */
+    LCDFRR = (1 << LCDCD2) | (1 << LCDCD1) | (1 << LCDCD0);
+    /* Output voltage to 3.35 V (all enabled) */
+    /* LCDDC[0:2] set to 0 for segment drive time 300μs*/
+    LCDCCR = (1 << LCDCC3) | (1 << LCDCC2) | (1 << LCDCC1  | (1 << LCDCC0));
+    /* Enable LCD, low power waveform and no interrupt enabled */
+    LCDCRA = (1 << LCDEN )| (1 << LCDAB);
+}
+
 // Store the lcdscc of every valid input in a sorted array,
 // Makes it possible to easily retrive ch by index and later store it in var seg
 static const uint16_t lcdscc[10]= {
@@ -107,7 +124,6 @@ void blink(int state){
 }
 #define LCDDR2_MASK ((1 << 1) | (1 << 2))
 void button(int state){
-    PORTB = (1 << 7);
     count_increase();
     printAt(count_return(), 4);
     if(state == 0){
@@ -116,6 +132,33 @@ void button(int state){
         LCDDR2 = (LCDDR2 & ~((1 << 1) | (1 << 2))) | (1 << 2);
     }
 }
+
+static volatile uint16_t count = 0;
+uint16_t count_return(){
+    return count;
+}
+uint16_t count_increase(){
+    return count++;
+}
+static volatile uint8_t state_blink = 0;
+uint8_t state_toggle_for_blink(){
+    if(state_blink == 0) {
+        state_blink = 1;
+        return state_blink;
+    }
+    state_blink = 0;
+    return state_blink;
+}
+static volatile uint8_t state_button = 0;
+uint8_t state_toggle_for_button(){
+    if(state_button == 0) {
+        state_button = 1;
+        return state_button;
+    }
+    state_button = 0;
+    return state_button;
+}
+
 ISR(TIMER1_COMPA_vect){
     spawn(blink, state_toggle_for_blink());
 }

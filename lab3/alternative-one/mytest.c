@@ -2,12 +2,30 @@
 #include <stdbool.h>
 #include <avr/io.h>
 #include <util/delay.h>
+#include <avr/interrupt.h>
 
 void updateReg(volatile uint8_t *reg, uint8_t high, uint8_t value);
 bool is_prime(long i);
 uint16_t timer_reset();
 uint16_t timer_return();
 uint16_t count_return();
+
+void LCD_Init(void) {
+    CLKPR = 0x80;
+    CLKPR = 0x00;
+    /* Use 32 kHz crystal oscillator */
+    /* 1/3 Bias and 1/4 duty. MUX0 & MUX1 Enabled */
+    /* SEG0:SEG24 is used as port pins. Enable all segments, LCDPM */
+    LCDCRB = (1 << LCDCS) | (1 << LCDMUX1) | (1 << LCDMUX0) | (1 << LCDPM2 | (1 << LCDPM1) | (1 << LCDPM0));
+    /* Using 16 as prescaler selection and 8 as LCD Clock Divide */
+    /* gives a frame rate of 32 Hz */
+    LCDFRR = (1 << LCDCD2) | (1 << LCDCD1) | (1 << LCDCD0);
+    /* Output voltage to 3.35 V (all enabled) */
+    /* LCDDC[0:2] set to 0 for segment drive time 300μs*/
+    LCDCCR = (1 << LCDCC3) | (1 << LCDCC2) | (1 << LCDCC1  | (1 << LCDCC0));
+    /* Enable LCD, low power waveform and no interrupt enabled */
+    LCDCRA = (1 << LCDEN )| (1 << LCDAB);
+}
 
 
 // Store the lcdscc of every valid input in a sorted array,
@@ -131,6 +149,28 @@ void button(int arg){
             state = false;
         }
     }
+}
+static volatile uint16_t count = 0;
+static volatile uint16_t timerCount = 0;
+
+ISR(PCINT1_vect){
+    if(!(PINB & (1<<7))){
+        count ++;
+        yield();
+    }
+}
+ISR(TIMER1_COMPA_vect){
+    timerCount ++;
+    yield();
+}
+uint16_t timer_return(){
+    return timerCount;
+}
+uint16_t timer_reset(){
+    timerCount = 0;
+}
+uint16_t count_return(){
+    return count;
 }
 
 int main() {
