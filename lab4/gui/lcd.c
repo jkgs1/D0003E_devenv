@@ -63,7 +63,6 @@ void writeChar(int ch, int pos){
         seg = seg >> 4;                                   // Shift to the next nibble
     }
 }
-
 void updateReg(volatile uint8_t *reg, uint8_t high, uint8_t value) {
     if (high) {
         *reg &= 0x0F;          // clear upper nibble
@@ -73,7 +72,15 @@ void updateReg(volatile uint8_t *reg, uint8_t high, uint8_t value) {
         *reg |= value;
     }
 }
-void printAt(long num, int pos) {
+#define LCDDR2_MASK ((1 << 1) | (1 << 2))
+void printAt(long num, int pos, bool left_freq) {
+    // Indicate what wave is active
+    if(left_freq){
+        LCDDR2 = (LCDDR2 & ~((1 << 1) | (1 << 2))) | (1 << 1);
+    }else{
+        LCDDR2 = (LCDDR2 & ~((1 << 1) | (1 << 2))) | (1 << 2);
+    }
+    
     pp = pos;
     writeChar( (num % 100) / 10 + '0', pp);
     pp++;
