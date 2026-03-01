@@ -3,4 +3,5 @@ typedef struct {
     int enabled;
     Generator left;
     Generator right;
+    bool left_freq;
 } GUI;
