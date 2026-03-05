@@ -1,4 +1,4 @@
-update();// The Timber compiler <timber-lang.org>
+// The Timber compiler <timber-lang.org>
 // 
 // Copyright 2008-2012 Johan Nordlander <nordland@csee.ltu.se>
 // All rights reserved.

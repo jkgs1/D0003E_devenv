@@ -1,13 +1,23 @@
+#include "../TinyTimber.h"
+#include "writer.h"
+#ifndef generator_H
+#define generator_H
 typedef struct {
     Object self;
-    int enabled;
+    int state;
     int frequency;
     int previous;
+    int bit;
+    PortWriter pw;
 } Generator;
 
-int waveGenerator(Generator *self, int arg);
+int waveGenerator(Generator *self);
 int increase     (Generator *self, int arg);
 int decrease     (Generator *self, int arg);
-int save         (Generator *self, int arg);
-int load         (Generator *self, int arg);
-int save_or_load (Generator *self, int arg);
+int save         (Generator *self);
+int load         (Generator *self);
+int save_or_load (Generator *self);
+
+#define initGenerator(bit, pw) {initObject(), 0, 0, 0, bit, pw}
+
+#endif

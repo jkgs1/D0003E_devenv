@@ -10,10 +10,10 @@ OBJDUMP    = avr-objdump
 SIZE       = avr-size
 TARGET     = main
 CONTROLLER = atmega169p
-SRC        = $(wildcard *.c)
+SRC        = $(shell find . -name "*.c")
 OBJ        = ${SRC:.c=.o}
 D_OBJ      = $(addprefix ./debug/, $(OBJ))
-R_OBJ      = $(addprefix ./run/, $(OBJ))
+R_OBJ = $(addprefix ./run/, $(OBJ))
 INCLUDE    = ./include
 
 # Flags copied from Atmel Studio's build output.
@@ -48,6 +48,8 @@ debug: mkpath ./debug/$(TARGET).elf d_hex upload
 
 mkpath:
 	mkdir -p $(BUILD_PATH)
+	mkdir -p $(BUILD_PATH)/waves
+	mkdir -p $(BUILD_PATH)/gui
 
 ./run/$(TARGET).elf : $(R_OBJ)
 	$(CC) $(CFLAGS) $(EXTRAFLAGS) -o $@ $(R_OBJ) $(ASFLAGS)
