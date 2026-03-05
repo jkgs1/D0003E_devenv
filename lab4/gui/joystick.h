@@ -5,14 +5,17 @@
 
 typedef struct{
     Object self;
-    Generator pulsePointer;
+    Generator *pulsePointer;
+    Generator *left;
+    Generator *right;
+    bool left_freq;
 } Joystick;
 
-void joystick_init();
+void joystick_init(Joystick *self);
 void left_or_right(Joystick *self, bool left_freq);
-void joystick_pressed_PCINT0();
-void joystick_pressed_PCINT1();
+void joystick_pressed_PCINT0(Joystick *self);
+void joystick_pressed_PCINT1(Joystick *self);
 
-#define initJoystick(pulsePointer){initObject(), pulsePointer}
+#define initJoystick(left, right){initObject(), left, left, right, true}
 
 #endif

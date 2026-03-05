@@ -2,52 +2,54 @@
 #include <stdbool.h>
 #include <avr/io.h>
 #include "joystick.h"
+#include "lcd.h"
+#include "graphics.h"
 
 void joystick_init(Joystick *self){
-    PORTB = (1 << 7);
-    EIMSK = (1 << PCIE1);
-    PCMSK1 = (1 << PCINT15);
+    PORTB |= (1 << 7);
+    EIMSK |= (1 << PCIE1);
+    PCMSK1 |= (1 << PCINT15);
 }
 void left_or_right(Joystick *self, bool left_freq){
     if (left_freq){
-        self->pulsePointer = pulsePointer->left;
+        self->pulsePointer = self->left;
     } else{
-        self->pulsePointer = pulsePointer->right;
+        self->pulsePointer = self->right;
     }
+    self->left_freq = left_freq;
 }
 
-void joystick_pressed_PCINT0(){
-    left_or_right(left_freq);
+void joystick_pressed_PCINT0(Joystick *self){
     if(!(PINB & (1<<7))){
-        ASYNC(&pulsePointer, decrease, 1);
-        ASYNC(&pulsePointer, update, left_freq);
+        ASYNC(self->pulsePointer, decrease, 1);
+        ASYNC(self->pulsePointer, update, self->left_freq);
     }
     if(!(PINB & (1<<6))){
-        ASYNC(&pulsePointer, increase, 1);
-        ASYNC(&pulsePointer, update, left_freq);
+        ASYNC(self->pulsePointer, increase, 1);
+        ASYNC(self->pulsePointer, update, self->left_freq);
     }
     if(!(PINB & (1<<4))){
-        ASYNC(&pulsePointer, save_or_load, 0);
-        ASYNC(&pulsePointer, update, left_freq);
+        ASYNC(self->pulsePointer, save_or_load, 0);
+        ASYNC(self->pulsePointer, update, self->left_freq);
     }
 }
 
-void joystick_pressed_PCINT1(){
+void joystick_pressed_PCINT1(Joystick *self){
     if(!(PINE & (1<<2))){
-        if (left_freq){
+        if (self->left_freq){
             return;
         }
-        switch_freq();
-        switch_arrows(left_freq);
-        ASYNC(&pulsePointer, update, left_freq);
+        left_or_right(self, true);
+        switch_arrows(self->left_freq);
+        ASYNC(self->pulsePointer, update, self->left_freq);
     }
     if(!(PINE & (1<<3))){
-        if (!left_freq){
+        if (!self->left_freq){
             return;
         }
-        switch_freq();
-        switch_arrows(left_freq);
-        ASYNC(&pulsePointer, update, left_freq);
+        left_or_right(self, false);
+        switch_arrows(self->left_freq);
+        ASYNC(self->pulsePointer, update, self->left_freq);
     }
 }
 
