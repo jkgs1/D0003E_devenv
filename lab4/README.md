@@ -1,30 +1,29 @@
-## Development environment for AVR butterfly
+In this assignment you will exercise programming according to the reactive objects model of TinyTimber Download TinyTimber (start by reading the description in full), and in particular, gain acquaintance with event baselines and the AFTER primitive. The concrete task is to implement two separate pulse generators on the AVR Butterfly, and a Graphical User Interface (GUI) for controlling them using the on-board joystick and display.
 
-This environment i based on <https://github.com/Tmplt/atmega169p-devenv> and
-modified to accommodate the new lab equipment in D0003E and debugging.
+Our pulse generators will generate square waves; that is, periodic signals that alternate between low and high values with a 50% duty cycle. Output from the pulse generators could in principle be emitted through any of the six general I/O ports on the AVR microcontroller. However, most pins on these ports are actually already connected to various devices on the Butterfly board, so we will have to direct pulse generator output as follows:
 
-This directory contains all necessary headers and a Makefile to program on the Atmel AVR Butterfly.
-Each `.c`-file placed into this directory is compiled by its own into an `.o`-file.
-The main executable is then created by linking these object files.
+    Pulse generator 1 writes its output to bit 4 of port E, which is connected to pin 1 of socket J405.
+    Pulse generator 2 writes its output to bit 6 of port E, which is connected to pin 3 of socket J405.
 
-All warnings are enabled, except those for quirks used in abundance by the included header files.
-These extra warnings can be omitted by commenting out the value of `EXTRAFLAGS` in the makefile, but they are highly recommended.
+See the AVR Butterfly User's Guide Download AVR Butterfly User's Guide for information on the physical location of socket J405 and its pins.
 
-`include/avr` was copied from the latest release of AVR Libc
-<http://www.nongnu.org/avr-libc/>. All other header files, and necessary compilation
-steps were copied from Atmel Studio 7.0.
+The period of each pulse generator should be individually controllable via a simple GUI on the LCD, operated by the joystick. The GUI should display two 2-digit numbers at positions 0 and 4 (counting from the right), standing for the current speed settings for pulse generators 1 and 2, respectively. The numbers should should adhere to the following rules:
 
-### How to run
-To program the butterfly you need to run `make` with root privileges or create a udev-rule
-(see <https://github.com/Tmplt/atmega169p-devenv>). To start a debugging session
-run `make debug` with root privileges.
+    Number should be frequency in Hz.
+    A value of 00 means a frequency of zero; i.e. a stopped pulse generator (emitting a constantly low output).
 
-### Debugging quirks
-To step through non function calls in the beginning of main you need to set a break
-point at the first line of main. Note that `break main` does not do this.
+Two arbitrary chosen segments should be used to indicate which of the two pulse generators that is currently receiving user input. Moving the joystick to the right or to the left should switch between these states. Moving the joystick in the upward/downward direction should increase/decrease the setting for the pulse generator currently in focus. Pressing the joystick with a non-zero frequency should save the frequency and immediately set the frequency to zero. Pressing the joystick while zero should restore the setting to its previous saved value. If no save value exists, it can be assumed to be 0. Moreover, it should be possible to hold the joystick in the up or down position and thereby achieve the same effect as repeated input in the corresponding direction. Convenient values for the repetition period and a possible initial delay should be obtained by experimentation.
 
+    Important note: you may need to install handlers for more than one interrupt to receive all input from the joystick. Moreover, if a method m of some object A has been installed as an interrupt handler, then all methods of this object will be executed with interrupts disabled. Do not use SYNC() and AFTER() in any method of the object A; instead, make an asynchronous call using ASYNC() to some other object and process the interrupt there.
 
-### Dependencies
-The Makefile depends on `avr-gcc`, `avr-objcopy`, `avr-objdump`, `avr-size`, `avrdude`, `avr-gdb`, `avarice`
-and possibly the `avr-libc` headers.
-These can be installed on Arch Linux via the `avr-libc`, `avr-gcc`, `avr-binutils`, `avr-gdb`, `avarice`(AUR) and `avrdude` packages (or via your distro's equivalent).
+To implement the assignment you will need a copy of the TinyTimber kernel, which is split into a header file TinyTimber.h Download TinyTimber.h and and implementation file TinyTimber.c Download TinyTimber.c.
+
+The following generic stylistic guidelines are mandatory to your solution: each reactive object class definition N shall be confined to a designated pair of files called N.h and N.c. File N.h shall contain a typedef for the class (i.e. struct) N, an initialization macro named initN(), and function headers for all methods supported by class N. File N.c shall contain the function definitions for the supported methods, and nothing else. The file main.c shall contain all object instances for the program as well as definitions of the top-level methods. Any remaining functionality (e.g. related to LCD handling) should be put in separate .h and .c files at your own discretion. No global variables whatsoever will be allowed in the program apart from the object instances defined in main.c.
+
+In addition, the following constraints apply:
+
+    The design should contain a separate reactive object for each pulse generator and at least one additional reactive object that handles the GUI.
+    The two pulse generator objects should be instances of a single pulse generator class, which consequently must be parameterized with respect to the bit number of port E it wishes to control.
+    To avoid race conditions with two generators simultaneously reading and writing port E, a dedicated object should handle the actual writing of individual bits to this port.
+
+It is advisable that the application be developed in steps, concentrating on one reactive object at a time. To verify that the pulse generator objects actually generate pulses of the correct frequency, connect an oscilloscope between ground (pin 4) and pin 1 or pin 3 of socket J405. Note that you can hook the probes of the oscilloscope directly into the pin holes of the board even though no pin header is soldered into the holes. For an introduction to oscilloscopes, see this tutorial.

@@ -5,13 +5,14 @@
 
 typedef struct {
     Object super;
-    Generator left;
-    Generator right;
+    Generator *left;
+    Generator *right;
     bool left_freq;
 } GUI;
 
-bool switch_freq(GUI *self, bool left_freq);
-void update(Generator *self, bool left_freq);
+int switch_freq(GUI *self);
+int read_direction(GUI *self);
+int update(GUI *self);
 
 #define initGRAPHICS(left, right){initObject(), left, right, true}
 

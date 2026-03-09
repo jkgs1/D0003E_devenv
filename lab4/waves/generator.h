@@ -8,15 +8,16 @@ typedef struct {
     int frequency;
     int previous;
     int bit;
-    PortWriter pw;
+    PortWriter *pw;
 } Generator;
 
-int waveGenerator(Generator *self);
-int increase     (Generator *self, int arg);
-int decrease     (Generator *self, int arg);
-int save         (Generator *self);
-int load         (Generator *self);
-int save_or_load (Generator *self);
+int waveGenerator (Generator *self);
+int increase      (Generator *self);
+int decrease      (Generator *self);
+int save          (Generator *self);
+int load          (Generator *self);
+int save_or_load  (Generator *self);
+int read_frequency(Generator *self);
 
 #define initGenerator(bit, pw) {initObject(), 0, 0, 0, bit, pw}
 

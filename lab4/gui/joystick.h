@@ -3,19 +3,26 @@
 #ifndef joystick_H
 #define joystick_H
 
+#include "graphics.h"
+
 typedef struct{
     Object self;
     Generator *pulsePointer;
     Generator *left;
     Generator *right;
-    bool left_freq;
+    int state;
+    GUI *gui;
 } Joystick;
 
-void joystick_init(Joystick *self);
-void left_or_right(Joystick *self, bool left_freq);
-void joystick_pressed_PCINT0(Joystick *self);
-void joystick_pressed_PCINT1(Joystick *self);
+extern GUI gui;
 
-#define initJoystick(left, right){initObject(), left, left, right, true}
+void joystick_init();
+void left_or_right(Joystick *self, int left_freq);
+int get_freq_value();
+int joystick_pressed_PCINT0(Joystick *self);
+int joystick_pressed_PCINT1(Joystick *self);
+int joystick_repeat(Joystick *self, int arg);
+
+#define initJoystick(left, right, gui){initObject(), left, left, right, 0, gui}
 
 #endif

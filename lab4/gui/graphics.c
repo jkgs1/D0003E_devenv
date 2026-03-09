@@ -1,14 +1,21 @@
 #include "graphics.h"
-#include "lcd.c"
+#include "lcd.h"
+#include "joystick.h"
+#include "../waves/generator.h"
 
-bool switch_freq(GUI *self, bool left_freq){
-    return left_freq != left_freq;
+int switch_freq(GUI *self){
+    self->left_freq = !self->left_freq;
+    return 1;
+}
+int read_direction(GUI *self) {
+    return self->left_freq;
 }
 
-void update(Generator *self, bool left_freq){
-    if (left_freq){
-        printAt(self->frequency, 0);
-    }else {
-        printAt(self->frequency, 4);
+int update(GUI *self){
+    if (self->left_freq) {
+        printAt(SYNC(self->left, read_frequency, 0), 0);
+    } else {
+        printAt(SYNC(self->right, read_frequency, 0), 4);
     }
+    return 0;
 }
