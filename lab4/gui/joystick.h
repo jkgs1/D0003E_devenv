@@ -12,6 +12,7 @@ typedef struct{
     Generator *right;
     int state;
     GUI *gui;
+    Msg msg;
 } Joystick;
 
 extern GUI gui;
@@ -23,6 +24,6 @@ int joystick_pressed_PCINT0(Joystick *self);
 int joystick_pressed_PCINT1(Joystick *self);
 int joystick_repeat(Joystick *self, int arg);
 
-#define initJoystick(left, right, gui){initObject(), left, left, right, 0, gui}
+#define initJoystick(left, right, gui){initObject(), left, left, right, 0, gui, NULL}
 
 #endif

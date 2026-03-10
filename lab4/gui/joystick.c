@@ -51,8 +51,12 @@ int joystick_repeat(Joystick *self, int bit) {
     if (!(PINB & (1 << bit))) {
         if (bit == 7) ASYNC(self->pulsePointer, decrease, 1);
         if (bit == 6) ASYNC(self->pulsePointer, increase, 1);
-        ASYNC(&gui, update, 0);
-        AFTER(MSEC(1000), self, joystick_repeat, bit);
+        SYNC(&gui, update, 0);
+        if (self->msg) {
+            ABORT(self->msg);
+            self->msg = NULL;
+        }
+        self->msg = AFTER(MSEC(1000), self, joystick_repeat, bit);
     }
     return 0;
 }

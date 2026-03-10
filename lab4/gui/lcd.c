@@ -2,7 +2,6 @@
 #include <stdbool.h>
 #include <avr/io.h>
 #include "lcd.h"
-#include "graphics.h"
 
 void LCD_Init(void) {
     CLKPR = 0x80;

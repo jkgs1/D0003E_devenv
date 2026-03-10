@@ -10,7 +10,7 @@ Generator right   = initGenerator(6, &pw);
 GUI gui           = initGRAPHICS(&left, &right);
 Joystick joystick = initJoystick(&left, &right, &gui);
 
-int start_app(GUI *obj, int arg) {
+int start_app() {
     LCD_Init();
     joystick_init();
     port_init();
