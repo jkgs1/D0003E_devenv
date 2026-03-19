@@ -4,8 +4,9 @@
 int waveGenerator(Generator *self){
     if (self->frequency > 0) {
         self->state = !self->state;
-        SYNC(self->pw, portWriter, self->bit);
+        ASYNC(self->pw, portWriter, self->bit);
         Time offset = MSEC(500 / self->frequency);
+        //AFTER(offset, self, waveGenerator, 0);
         if (self->msg) {
             ABORT(self->msg);
             self->msg = NULL;
@@ -13,7 +14,7 @@ int waveGenerator(Generator *self){
         self->msg =AFTER(offset, self, waveGenerator, 0);
     } else {
         self->state = 0;
-        SYNC(self->pw, portWriter_clear, self->bit);
+        ASYNC(self->pw, portWriter_clear, self->bit);
     }
     return 0;
 }
@@ -42,7 +43,7 @@ int save_or_load(Generator *self){
     if(self->frequency == 0){
         return self->frequency = load(self);
     }
-    return self->frequency = load(self);
+    return self->frequency = save(self);
 }
 int read_frequency(Generator *self) {
     return self->frequency;
