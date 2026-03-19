@@ -33,12 +33,12 @@ int joystick_pressed_PCINT1(Joystick *self){
         if(!(PINB & (1<<7))){ // DOWN
             ASYNC(self->pulsePointer, decrease, 1);
             ASYNC(&gui, update, 0);
-            AFTER(MSEC(500), self, joystick_repeat, 7);
+            //AFTER(MSEC(500), self, joystick_repeat, 7);
         }
         if(!(PINB & (1<<6))){ // UP
             ASYNC(self->pulsePointer, increase, 1);
             ASYNC(&gui, update, 0);
-            AFTER(MSEC(500), self, joystick_repeat, 6);
+            //AFTER(MSEC(500), self, joystick_repeat, 6);
         }
         if(!(PINB & (1<<4))){ // CENTER
             ASYNC(self->pulsePointer, save_or_load, 0);
@@ -51,12 +51,8 @@ int joystick_repeat(Joystick *self, int bit) {
     if (!(PINB & (1 << bit))) {
         if (bit == 7) ASYNC(self->pulsePointer, decrease, 1);
         if (bit == 6) ASYNC(self->pulsePointer, increase, 1);
-        SYNC(&gui, update, 0);
-        if (self->msg) {
-            ABORT(self->msg);
-            self->msg = NULL;
-        }
-        self->msg = AFTER(MSEC(1000), self, joystick_repeat, bit);
+        ASYNC(&gui, update, 0);
+        AFTER(MSEC(1000), self, joystick_repeat, bit);
     }
     return 0;
 }

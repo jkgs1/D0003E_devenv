@@ -13,6 +13,8 @@ typedef struct{
     int state;
     GUI *gui;
     Msg msg;
+    Msg msg_down;
+    Msg msg_up;
 } Joystick;
 
 extern GUI gui;
@@ -24,6 +26,6 @@ int joystick_pressed_PCINT0(Joystick *self);
 int joystick_pressed_PCINT1(Joystick *self);
 int joystick_repeat(Joystick *self, int arg);
 
-#define initJoystick(left, right, gui){initObject(), left, left, right, 0, gui, NULL}
+#define initJoystick(left, right, gui){initObject(), left, left, right, 0, gui, NULL, NULL, NULL}
 
 #endif
