@@ -9,6 +9,7 @@ typedef struct {
     int previous;
     int bit;
     PortWriter *pw;
+    Msg msg;
 } Generator;
 
 int waveGenerator (Generator *self);
