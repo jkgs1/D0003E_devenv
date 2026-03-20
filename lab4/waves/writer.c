@@ -6,7 +6,7 @@ void port_init(){
 }
 
 void portWriter(PortWriter *self, int bit){
-    PORTE ^= (1<<bit);   
+    PORTE ^= (1<<bit);
 }
 
 void portWriter_clear(PortWriter *self, int bit){

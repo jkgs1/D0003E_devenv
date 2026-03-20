@@ -3,12 +3,14 @@
 #include "gui/graphics.h"
 #include "gui/joystick.h"
 #include "gui/lcd.h"
+#include "gui/savinggrace.h"
 
 PortWriter pw     = initPortWriter();
 Generator left    = initGenerator(4, &pw);
 Generator right   = initGenerator(6, &pw);
 GUI gui           = initGRAPHICS(&left, &right);
 Joystick joystick = initJoystick(&left, &right, &gui);
+SavingGrace sg    = initSavingGrace(&joystick);
 
 int start_app(GUI *obj, int arg) {
     LCD_Init();
@@ -20,7 +22,7 @@ int start_app(GUI *obj, int arg) {
     right.frequency = 0;
     
     // Start display
-    update(&gui);
+    update(&gui, 0);
     switch_arrows(false);
     
     // Start pulse generators
@@ -31,7 +33,7 @@ int start_app(GUI *obj, int arg) {
 }
 
 int main(void){
-    INSTALL(&joystick, joystick_pressed_PCINT0, IRQ_PCINT0);
-    INSTALL(&joystick, joystick_pressed_PCINT1, IRQ_PCINT1);
+    INSTALL(&sg, mosmeny, IRQ_PCINT0);
+    INSTALL(&sg, saveusgod, IRQ_PCINT1);
     return TINYTIMBER(&gui, start_app, 0);
 }

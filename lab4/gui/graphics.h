@@ -10,9 +10,9 @@ typedef struct {
     bool left_freq;
 } GUI;
 
-int switch_freq(GUI *self);
-int read_direction(GUI *self);
-int update(GUI *self);
+int switch_freq(GUI *self, int arg);
+int read_direction(GUI *self, int arg);
+int update(GUI *self, int arg);
 
 #define initGRAPHICS(left, right){initObject(), left, right, true}
 

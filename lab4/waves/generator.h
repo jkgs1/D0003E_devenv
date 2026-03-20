@@ -3,7 +3,7 @@
 #ifndef generator_H
 #define generator_H
 typedef struct {
-    Object self;
+    Object super;
     int state;
     int frequency;
     int previous;
@@ -12,13 +12,13 @@ typedef struct {
     Msg msg;
 } Generator;
 
-int waveGenerator (Generator *self);
-int increase      (Generator *self);
-int decrease      (Generator *self);
-int save          (Generator *self);
-int load          (Generator *self);
-int save_or_load  (Generator *self);
-int read_frequency(Generator *self);
+int waveGenerator (Generator *self, int arg);
+int increase      (Generator *self, int arg);
+int decrease      (Generator *self, int arg);
+int save          (Generator *self, int arg);
+int load          (Generator *self, int arg);
+int save_or_load  (Generator *self, int arg);
+int read_frequency(Generator *self, int arg);
 
 #define initGenerator(bit, pw) {initObject(), 0, 0, 0, bit, pw}
 

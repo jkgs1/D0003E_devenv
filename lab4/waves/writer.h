@@ -3,7 +3,7 @@
 #define writer_h
 
 typedef struct{
-    Object self;
+    Object super;
 } PortWriter;
 
 #define initPortWriter(){initObject()}
